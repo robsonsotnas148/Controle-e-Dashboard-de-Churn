@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Controle de Churn e Risco</title>
+    
+    <link rel="stylesheet" href="styles.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<div class="container">
+    <h1>📊 Controle e Dashboard de Churn</h1>
+    
+    <div id="controles">
+        <h2>🛠️ Gerenciamento de Dados</h2>
+        
+        <button onclick="adicionarLinha()">➕ Adicionar Cliente</button>
+        <button onclick="calcularEExibirDashboard()">📈 Calcular Dashboard</button>
+        <p style="font-size: 0.9em; margin-top: 10px;">*Dados salvos automaticamente no seu navegador (Local Storage).</p>
+
+        <div id="motivos-churn-manager">
+            <h3>📝 Gerenciar Motivos de Churn</h3>
+            <p>Use esta seção para adicionar, editar ou remover motivos da lista que aparece na tabela abaixo.</p>
+            <ul id="lista-motivos-edicao">
+                </ul>
+
+            <label for="novo-motivo">Novo Motivo de Churn:</label>
+            <input type="text" id="novo-motivo" placeholder="Ex: Problema de Integração">
+            <button onclick="adicionarMotivo()">➕ Adicionar Motivo</button>
+        </div>
+    </div>
+
+    <hr>
+
+    <div id="dados-container">
+        <h2>📝 Tabela de Clientes</h2>
+        <table id="tabela-clientes">
+            <thead>
+                <tr>
+                    <th>Nome do Cliente</th>
+                    <th>Status</th>
+                    <th>Engajamento</th>
+                    <th>Satisfação</th>
+                    <th>Valor Mensal (R$)</th>
+                    <th>Motivo Churn (Tags)</th>
+                    <th>Tempo de Uso (Meses)</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr id="linha-exemplo-1">
+                    <td><input type="text" class="nome-cliente" value="Cliente Exemplo 1"></td>
+                    <td><select class="status"><option>Ativo</option><option selected>Churn</option></select></td>
+                    <td><select class="engajamento"><option>Engajado</option><option>Neutro</option><option selected>Desengajado</option></select></td>
+                    <td><select class="satisfeito"><option>Sim</option><option selected>Não</option></select></td>
+                    <td><input type="number" class="valor-mensal" value="200" min="0"></td>
+                    
+                    <td>
+                        <div class="motivo-churn-wrapper">
+                            <select class="motivo-churn-select" multiple style="display:none;"></select> 
+                            <div class="motivo-churn-tags"></div> 
+                            <button class="motivo-churn-edit-btn" onclick="editarMotivos(this)">Selecionar Motivos</button>
+                        </div>
+                    </td> 
+                    
+                    <td><input type="number" class="tempo-uso" value="8" min="1"></td>
+                    <td><button onclick="removerLinha(this)">🗑️</button></td> 
+                </tr>
+                <tr id="linha-exemplo-2">
+                    <td><input type="text" class="nome-cliente" value="Cliente Exemplo 2"></td>
+                    <td><select class="status"><option selected>Ativo</option><option>Churn</option></select></td>
+                    <td><select class="engajamento"><option>Engajado</option><option selected>Neutro</option><option>Desengajado</option></select></td>
+                    <td><select class="satisfeito"><option>Sim</option><option selected>Não</option></select></td>
+                    <td><input type="number" class="valor-mensal" value="50" min="0"></td>
+                    
+                    <td>
+                        <div class="motivo-churn-wrapper">
+                            <select class="motivo-churn-select" multiple style="display:none;"></select> 
+                            <div class="motivo-churn-tags"></div> 
+                            <button class="motivo-churn-edit-btn" onclick="editarMotivos(this)">Selecionar Motivos</button>
+                        </div>
+                    </td> 
+                    
+                    <td><input type="number" class="tempo-uso" value="2" min="1"></td>
+                    <td><button onclick="removerLinha(this)">🗑️</button></td> 
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <hr>
+
+    <div id="dashboard-container">
+        <h2>📊 Dashboard de Indicadores</h2>
+        
+        <div class="dashboard-grid" id="indicadores-sumario">
+            <div class="indicador-card">
+                <div class="indicador-titulo">Clientes Ativos</div>
+                <div class="indicador-valor" id="total-ativos">0</div>
+            </div>
+            <div class="indicador-card">
+                <div class="indicador-titulo">Clientes em Churn</div>
+                <div class="indicador-valor" id="total-churn">0</div>
+            </div>
+            <div class="indicador-card">
+                <div class="indicador-titulo">Taxa de Churn (Rate)</div>
+                <div class="indicador-valor" id="churn-rate">0.00%</div>
+            </div>
+            <div class="indicador-card">
+                <div class="indicador-titulo">MRR Perdido (R$)</div>
+                <div class="indicador-valor" id="mrr-lost">R$ 0.00</div>
+            </div>
+             <div class="indicador-card">
+                <div class="indicador-titulo">Impacto no Valor Futuro</div>
+                <div class="indicador-valor" id="perda-valor-futuro">0.00%</div>
+            </div>
+        </div>
+
+        <h3 style="margin-top: 30px;">Distribuição de Motivos de Churn (Clientes Perdidos)</h3>
+        <p id="sem-dados-motivo" class="alerta" style="display: none;">Calcule o dashboard para ver o gráfico.</p>
+        <div id="grafico-motivos-container">
+            <canvas id="motivosChurnChart"></canvas>
+        </div>
+        
+        <h3 style="margin-top: 30px;">Clientes Ativos por Nível de Risco (Propensão ao Churn)</h3>
+        <p id="sem-dados-risco" class="alerta" style="display: none;">Não há clientes ativos ou cálculo de risco pendente.</p>
+        <div id="grafico-risco-container">
+            <canvas id="riscoChurnChart"></canvas>
+        </div>
+
+        <h3 style="margin-top: 30px;">Clientes por Categoria de Risco (Ação Imediata)</h3>
+        <div class="risk-list-container">
+            <div class="risk-card risco-alto">
+                <h4>🚨 Risco Alto</h4>
+                <ul id="lista-risco-alto"><li>Nenhum cliente nesta categoria.</li></ul>
+            </div>
+            <div class="risk-card risco-medio">
+                <h4>⚠️ Risco Médio</h4>
+                <ul id="lista-risco-medio"><li>Nenhum cliente nesta categoria.</li></ul>
+            </div>
+            <div class="risk-card risco-baixo">
+                <h4>✅ Risco Baixo</h4>
+                <ul id="lista-risco-baixo"><li>Nenhum cliente nesta categoria.</li></ul>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
