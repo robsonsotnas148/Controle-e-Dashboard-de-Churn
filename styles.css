@@ -1,0 +1,208 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    background-color: #f4f7f6;
+}
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background-color: #ffffff;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+h1, h2 {
+    color: #2c3e50;
+}
+hr {
+    border: 0;
+    height: 1px;
+    background-color: #ddd;
+    margin: 20px 0;
+}
+/* Estilo da Tabela de Entrada de Dados */
+#dados-container {
+    margin-bottom: 30px;
+}
+#tabela-clientes {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+#tabela-clientes th, #tabela-clientes td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+#tabela-clientes th {
+    background-color: #e8f0fe;
+    color: #34495e;
+}
+
+/* --- ESTILOS DE RISCO PARA LINHAS DA TABELA --- */
+.risco-alto {
+    background-color: #fdd8d8 !important; /* Vermelho claro */
+}
+.risco-medio {
+    background-color: #fff8e1 !important; /* Amarelo claro */
+}
+.risco-baixo {
+    background-color: #e8f5e9 !important; /* Verde claro */
+}
+/* -------------------------------------------------- */
+
+/* Estilo dos Botões e Inputs */
+button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    margin-right: 10px;
+    border-radius: 4px;
+}
+button:hover {
+    background-color: #2980b9;
+}
+input[type="text"], input[type="number"], select {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-right: 10px;
+    box-sizing: border-box; 
+}
+#tabela-clientes input[type="text"], #tabela-clientes input[type="number"], #tabela-clientes select {
+    width: 100%;
+}
+
+/* Estilo do Dashboard */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+    gap: 20px;
+    margin-top: 20px;
+}
+.indicador-card {
+    background-color: #ecf0f1;
+    padding: 15px;
+    border-radius: 6px;
+    text-align: center;
+}
+.indicador-valor {
+    font-size: 1.8em; 
+    font-weight: bold;
+    color: #e74c3c; 
+    margin: 5px 0;
+}
+.indicador-titulo {
+    font-size: 0.9em;
+    color: #7f8c8d;
+}
+/* Containers de Gráficos */
+#grafico-motivos-container, #grafico-risco-container {
+    max-width: 500px;
+    margin: 20px auto;
+}
+
+.alerta {
+    color: #e74c3c;
+    font-weight: bold;
+}
+
+/* --- ESTILOS PARA LISTA DE RISCO (Ação Imediata) --- */
+.risk-list-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+.risk-card {
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+.risk-card h4 {
+    margin-top: 0;
+    font-size: 1.2em;
+}
+#lista-risco-alto, #lista-risco-medio, #lista-risco-baixo {
+    list-style-type: none;
+    padding-left: 0;
+    font-size: 0.9em;
+}
+.risk-card.risco-alto { background-color: #fce4e4; border: 1px solid #e74c3c; }
+.risk-card.risco-medio { background-color: #fffde7; border: 1px solid #f39c12; }
+.risk-card.risco-baixo { background-color: #e8f5e9; border: 1px solid #2ecc71; }
+/* ---------------------------------- */
+
+/* Estilos para Gerenciamento de Motivos */
+#motivos-churn-manager {
+    border: 1px dashed #ccc;
+    padding: 15px;
+    margin: 20px 0;
+    border-radius: 4px;
+}
+#lista-motivos-edicao {
+    list-style: none;
+    padding: 0;
+    margin-top: 10px;
+}
+#lista-motivos-edicao li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+    border-bottom: 1px dotted #eee;
+}
+#lista-motivos-edicao li:last-child {
+    border-bottom: none;
+}
+#lista-motivos-edicao span {
+    padding: 5px;
+    border: 1px solid transparent;
+}
+#lista-motivos-edicao span:focus {
+    border-color: #3498db;
+    outline: none;
+}
+
+/* NOVOS ESTILOS PARA O CAMPO MOTIVO CHURN */
+
+.motivo-churn-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 5px;
+    min-height: 40px;
+}
+
+.motivo-churn-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    min-width: 100px; /* Garante que haja espaço mínimo */
+}
+
+.motivo-tag {
+    background-color: #fce4e4; /* Vermelho muito claro */
+    color: #c0392b; /* Vermelho escuro para texto */
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.8em;
+    border: 1px solid #e74c3c;
+    white-space: nowrap;
+}
+
+.motivo-churn-edit-btn {
+    padding: 3px 6px;
+    background-color: #3498db; /* Azul */
+    font-size: 0.8em;
+}
+
+.motivo-churn-tags.motivo-ativo {
+    color: #7f8c8d; /* Texto cinza para 'Cliente Ativo' */
+    font-style: italic;
+    font-size: 0.9em;
+    /* Remover cor de fundo se houver */
+    background-color: transparent; 
+    border: none;
+}
