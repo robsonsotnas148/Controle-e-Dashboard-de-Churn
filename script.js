@@ -197,7 +197,7 @@ function editarMotivos(button) {
             const motive = motivosChurnBase[index - 1];
             const optionToSelect = Array.from(motivoSelect.options).find(opt => opt.value === motive);
             if (optionToSelect) {
-                optionToSelect.selected = true;
+                optionToSelect.selected = true; 
             }
         });
         
@@ -536,9 +536,15 @@ function calcularIndicadores(dados) {
     });
 
     let distribuicaoRisco = { "Baixo": 0, "Médio": 0, "Alto": 0 };
+    let mrrPorRisco = { "Baixo": 0, "Médio": 0, "Alto": 0 }; 
     
     clientesAtivos.forEach(cliente => {
-        distribuicaoRisco[cliente.nivelRisco]++;
+        // Garante que o nível de risco é uma das chaves válidas antes de usar
+        const nivel = cliente.nivelRisco;
+        if (nivel === 'Baixo' || nivel === 'Médio' || nivel === 'Alto') {
+            distribuicaoRisco[nivel]++;
+            mrrPorRisco[nivel] += cliente.valorMensal; 
+        }
     });
 
     return {
@@ -549,7 +555,8 @@ function calcularIndicadores(dados) {
         mrrLost: mrrLost,
         impactoPerdaValorFuturo: impactoPerdaValorFuturo,
         distribuicaoMotivos: contagemMotivos,
-        distribuicaoRisco: distribuicaoRisco
+        distribuicaoRisco: distribuicaoRisco,
+        mrrPorRisco: mrrPorRisco 
     };
 }
 
@@ -563,10 +570,15 @@ function exibirDashboard(resultados, dadosClientes) {
     exibirGraficoMotivos(resultados.distribuicaoMotivos);
     exibirGraficoRisco(resultados.distribuicaoRisco);
     
-    exibirListaRisco(dadosClientes);
+    exibirListaRisco(dadosClientes, resultados.mrrPorRisco); 
 }
 
-function exibirListaRisco(dadosClientes) {
+/**
+ * Exibe a lista de clientes por risco e adiciona o MRR total ao título de cada categoria.
+ * @param {Array} dadosClientes - Lista completa de clientes.
+ * @param {Object} mrrPorRisco - Soma do MRR por nível de risco (Baixo, Médio, Alto).
+ */
+function exibirListaRisco(dadosClientes, mrrPorRisco) {
     const clientesAtivos = dadosClientes.filter(c => c.status === 'Ativo');
 
     const listas = {
@@ -574,13 +586,34 @@ function exibirListaRisco(dadosClientes) {
         'Médio': document.getElementById('lista-risco-medio'),
         'Baixo': document.getElementById('lista-risco-baixo')
     };
+    
+    // Seleciona os títulos (h4) para adicionar o MRR
+    const riskCardsHeaders = {
+        'Alto': listas['Alto']?.closest('.risk-card')?.querySelector('h4'),
+        'Médio': listas['Médio']?.closest('.risk-card')?.querySelector('h4'),
+        'Baixo': listas['Baixo']?.closest('.risk-card')?.querySelector('h4'),
+    };
 
+
+    // Limpa as listas
     Object.keys(listas).forEach(nivel => {
         if (listas[nivel]) {
             listas[nivel].innerHTML = '';
         }
     });
 
+    // Atualiza os títulos dos cards de risco com a soma do MRR
+    Object.keys(riskCardsHeaders).forEach(nivel => {
+        if (riskCardsHeaders[nivel] && mrrPorRisco) {
+            const mrr = mrrPorRisco[nivel].toFixed(2);
+            // Reconstruir o H4 incluindo o MRR e o emoji (usando a classe .mrr-risco-sum)
+            const emoji = nivel === 'Alto' ? '🚨' : nivel === 'Médio' ? '⚠️' : '✅';
+            riskCardsHeaders[nivel].innerHTML = `${emoji} Risco ${nivel} <span class="mrr-risco-sum">(MRR: R$ ${mrr})</span>`;
+        }
+    });
+
+
+    // Adiciona os clientes às listas
     clientesAtivos.forEach(cliente => {
         const nivel = cliente.nivelRisco;
         const lista = listas[nivel];
@@ -592,6 +625,7 @@ function exibirListaRisco(dadosClientes) {
         }
     });
 
+    // Se a lista estiver vazia, coloca a mensagem padrão
     Object.keys(listas).forEach(nivel => {
         if (listas[nivel] && listas[nivel].children.length === 0) {
              const li = document.createElement('li');
@@ -622,6 +656,8 @@ function exibirGraficoMotivos(contagemMotivos) {
     if (motivos.length > 0) {
         meuGraficoMotivos = new Chart(ctx, {
             type: 'pie',
+            // 💡 Adiciona o plugin de datalabels
+            plugins: [ChartDataLabels], 
             data: {
                 labels: motivos,
                 datasets: [{
@@ -646,6 +682,26 @@ function exibirGraficoMotivos(contagemMotivos) {
                     title: {
                         display: true,
                         text: 'Distribuição Percentual de Motivos de Churn'
+                    },
+                    // 💡 Configuração do plugin de DataLabels para porcentagem
+                    datalabels: {
+                        formatter: (value, context) => {
+                            const data = context.chart.data.datasets[0].data;
+                            const total = data.reduce((sum, v) => sum + v, 0);
+                            const percentage = ((value / total) * 100).toFixed(1);
+                            
+                            // Exibe o nome da fatia e a porcentagem
+                            return `${context.chart.data.labels[context.dataIndex]}\n(${percentage}%)`; 
+                        },
+                        color: '#fff', // Cor do texto dos labels
+                        font: {
+                            weight: 'bold',
+                            size: 14
+                        },
+                        // Posiciona os rótulos na borda externa
+                        anchor: 'end',
+                        align: 'start',
+                        offset: 10
                     }
                 }
             }
@@ -717,9 +773,14 @@ function exibirGraficoRisco(distribuicaoRisco) {
 
 
 function calcularEExibirDashboard() {
+    // 1. Coleta dados e calcula o risco (incluirRisco=true por padrão)
     const dados = coletarDadosClientes();
+    // 2. Calcula indicadores (incluindo o novo MRR por risco)
     const resultados = calcularIndicadores(dados);
+    // 3. Exibe tudo
     exibirDashboard(resultados, dados); 
+    // 4. Salva dados automaticamente
+    salvarDados();
 }
 
 // ----------------------------------------------------------------------
@@ -730,9 +791,6 @@ document.addEventListener('DOMContentLoaded', () => {
     renderMotivosList();
     carregarDadosEAtualizarTabela();
     
-    // 2. Garante que os dropdowns e listeners estão configurados
-    // (O carregarDadosEAtualizarTabela já chama inicializarMotivosDropdowns para cada linha)
-    
-    // 3. Calcula e exibe o dashboard com os dados carregados
+    // 2. Calcula e exibe o dashboard com os dados carregados
     calcularEExibirDashboard();
 });
