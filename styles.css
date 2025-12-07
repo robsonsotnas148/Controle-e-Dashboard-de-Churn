@@ -123,7 +123,18 @@ input[type="text"], input[type="number"], select {
 .risk-card h4 {
     margin-top: 0;
     font-size: 1.2em;
+    display: flex; /* Para alinhar o MRR à direita se necessário, mas aqui alinhamos ao lado */
+    justify-content: space-between; /* Ajuste se o MRR for para o lado */
 }
+/* NOVO: Estilo para o valor do MRR na categoria de risco */
+.mrr-risco-sum {
+    font-size: 0.8em;
+    font-weight: normal;
+    color: #7f8c8d;
+    margin-left: 10px; /* Adiciona espaço entre o título e o MRR */
+    display: inline-block;
+}
+
 #lista-risco-alto, #lista-risco-medio, #lista-risco-baixo {
     list-style-type: none;
     padding-left: 0;
